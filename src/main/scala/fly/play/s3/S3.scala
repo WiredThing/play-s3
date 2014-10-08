@@ -22,14 +22,14 @@ object S3 {
   def config = current.configuration
 
   val regionEndpoints = Map(
-      "us-east-1" -> "s3.amazonaws.com",
-      "us-west-1" -> "s3-us-west-1.amazonaws.com",
-      "us-west-2" -> "s3-us-west-2.amazonaws.com",
-      "eu-west-1" -> "s3-eu-west-1.amazonaws.com",
-      "ap-southeast-1" -> "s3-ap-southeast-1.amazonaws.com",
-      "ap-southeast-2" ->  "s3-ap-southeast-2.amazonaws.com",
-      "ap-northeast-1" -> "s3-ap-northeast-1.amazonaws.com",
-      "sa-east-1" -> "s3-sa-east-1.amazonaws.com"
+    "us-east-1" -> "s3.amazonaws.com",
+    "us-west-1" -> "s3-us-west-1.amazonaws.com",
+    "us-west-2" -> "s3-us-west-2.amazonaws.com",
+    "eu-west-1" -> "s3-eu-west-1.amazonaws.com",
+    "ap-southeast-1" -> "s3-ap-southeast-1.amazonaws.com",
+    "ap-southeast-2" -> "s3-ap-southeast-2.amazonaws.com",
+    "ap-northeast-1" -> "s3-ap-northeast-1.amazonaws.com",
+    "sa-east-1" -> "s3-sa-east-1.amazonaws.com"
   )
 
   def https = config getBoolean "s3.https" getOrElse false
@@ -40,8 +40,8 @@ object S3 {
 
   def region = config getString "s3.region" getOrElse "us-east-1"
 
-  def fromConfig(implicit credentials: AwsCredentials) =
-    new S3(https, host, region, pathStyleAccess)
+  def fromConfig(implicit credentials: AwsCredentials, customSigner: Option[S3Signer] = None) =
+    new S3(https, host, region, pathStyleAccess, customSigner)
 
   /**
    * Utility method to create a bucket.
@@ -67,9 +67,8 @@ object S3 {
 
 }
 
-class S3(val https: Boolean, val host: String, val region: String, val pathStyleAccess: Boolean = false)(implicit val credentials: AwsCredentials) {
-
-  lazy val signer = new S3Signer(credentials, region)
+class S3(val https: Boolean, val host: String, val region: String, val pathStyleAccess: Boolean = false, customSigner: Option[S3Signer] = None)(implicit val credentials: AwsCredentials) {
+  lazy val signer = customSigner.getOrElse(new S3Signer(credentials, region))
   lazy val awsWithSigner = Aws withSigner signer
 
   /**
