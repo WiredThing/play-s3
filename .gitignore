@@ -1,15 +1,13 @@
 logs
 project/project
-project/target
 target
 tmp
-.history
 dist
 /.settings
 /.classpath
 /.project
 test/conf
-src/test/conf
 /.cache
 .target
 /bin
+.idea
